@@ -3,9 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
 import contactsRouter from "./routes/ali/contactsRouter.js";
-
-const BD_HOST =
-  "mongodb+srv://Mykola:f3Gkn1DGQwWHvVDk@cluster0.vixzqkv.mongodb.net/contacts_reader?retryWrites=true&w=majority";
+import BD_HOST from "./config.js";
 
 const app = express();
 
