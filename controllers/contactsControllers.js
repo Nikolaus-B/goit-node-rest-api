@@ -1,11 +1,53 @@
-import contactsService from "../services/contactsServices.js";
+import contacts from "../services/contactsServices.js";
+import HttpError from "../helpers/HttpError.js";
+import { createContactSchema } from "../schemas/contactsSchemas.js";
+import ctrlWrapper from "../helpers/ctrlWrapper.js";
 
-export const getAllContacts = (req, res) => {};
+const getAllContacts = async (req, res) => {
+  const result = await contacts.listContacts();
+  res.json(result);
+};
 
-export const getContactById = (req, res) => {};
+const getContactById = async (req, res) => {
+  const { id } = req.params;
+  const result = await contacts.getContactById(id);
+  if (!result) {
+    throw HttpError(404);
+  }
+  res.json(result);
+};
 
-export const deleteContact = (req, res) => {};
+const createContact = async (req, res) => {
+  const result = await contacts.addContact(req.body);
+  res.status(201).json(result);
+};
 
-export const createContact = (req, res) => {};
+const updateContact = async (req, res) => {
+  const { id } = req.params;
+  const result = await contacts.updateById(id, req.body);
 
-export const updateContact = (req, res) => {};
+  if (!result) {
+    throw HttpError(404);
+  }
+
+  res.json(result);
+};
+
+const deleteContact = async (req, res) => {
+  const { id } = req.params;
+  const result = await contacts.removeContact(id);
+  if (!result) {
+    throw HttpError(404);
+  }
+  res.json({
+    message: "Contact deleted successfully",
+  });
+};
+
+export default {
+  getAllContacts: ctrlWrapper(getAllContacts),
+  getContactById: ctrlWrapper(getContactById),
+  createContact: ctrlWrapper(createContact),
+  updateContact: ctrlWrapper(updateContact),
+  deleteContact: ctrlWrapper(deleteContact),
+};

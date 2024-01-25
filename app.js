@@ -1,8 +1,11 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import mongoose from "mongoose";
+import contactsRouter from "./routes/ali/contactsRouter.js";
 
-import contactsRouter from "./routes/contactsRouter.js";
+const BD_HOST =
+  "mongodb+srv://Mykola:f3Gkn1DGQwWHvVDk@cluster0.vixzqkv.mongodb.net/contacts_reader?retryWrites=true&w=majority";
 
 const app = express();
 
@@ -21,6 +24,15 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-app.listen(3000, () => {
-  console.log("Server is running. Use our API on port: 3000");
-});
+mongoose
+  .connect(BD_HOST)
+  .then(() => {
+    console.log("Database connection successful");
+    app.listen(3000, () => {
+      console.log("Server is running. Use our API on port: 3000");
+    });
+  })
+  .catch((error) => {
+    console.log(error.message);
+    process.exit(1);
+  });
