@@ -3,8 +3,11 @@ import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
 import contactsRouter from "./routes/ali/contactsRouter.js";
+import dotenv from "dotenv";
 
-const { BD_HOST } = process.env;
+dotenv.config();
+
+const { DB_HOST } = process.env;
 
 const app = express();
 
@@ -24,7 +27,7 @@ app.use((err, req, res, next) => {
 });
 
 mongoose
-  .connect(BD_HOST)
+  .connect(DB_HOST)
   .then(() => {
     console.log("Database connection successful");
     app.listen(3000, () => {
