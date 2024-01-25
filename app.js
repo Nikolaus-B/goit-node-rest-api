@@ -3,7 +3,8 @@ import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
 import contactsRouter from "./routes/ali/contactsRouter.js";
-import BD_HOST from "./config.js";
+
+const { BD_HOST } = process.env;
 
 const app = express();
 
