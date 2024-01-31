@@ -2,7 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
-import contactsRouter from "./routes/ali/contactsRouter.js";
+import contactsRouter from "./routes/api/contactsRouter.js";
+import authRouter from "./routes/api/authRouter.js";
 import dotenv from "dotenv";
 import "colors";
 
@@ -16,6 +17,7 @@ app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/auth", authRouter);
 app.use("/api/contacts", contactsRouter);
 
 app.use((_, res) => {
