@@ -33,7 +33,7 @@ const login = async (req, res) => {
     throw HttpError(401, "email or password invalid");
   }
 
-  const passwordCompare = bcrypt.compare(password, user.password);
+  const passwordCompare = await bcrypt.compare(password, user.password);
 
   if (!passwordCompare) {
     throw HttpError(401, "email or password invalid");
@@ -44,13 +44,33 @@ const login = async (req, res) => {
   };
 
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
+  await User.findByIdAndUpdate(user._id, { token });
 
   res.json({
     token,
   });
 };
 
+const current = async (req, res) => {
+  const { email, subscription } = req.user;
+  res.json({
+    email,
+    subscription,
+  });
+};
+
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: "" });
+
+  res.json({
+    message: "Logout successful",
+  });
+};
+
 export default {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
+  current: ctrlWrapper(current),
+  logout: ctrlWrapper(logout),
 };
