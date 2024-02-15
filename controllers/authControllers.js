@@ -9,9 +9,11 @@ import path from "path";
 import fs from "fs/promises";
 import { log } from "console";
 import Jimp from "jimp";
+import { nanoid } from "nanoid";
+import sendUserEmail from "../helpers/sendEmail.js";
 
 dotenv.config();
-const { SECRET_KEY } = process.env;
+const { SECRET_KEY, BASE_URL } = process.env;
 
 const avatarsDir = path.join("public/avatars");
 
@@ -25,16 +27,65 @@ const register = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
   const avatarURL = gravatar.url(email);
+  const verificationToken = nanoid();
 
   const newUser = await User.create({
     ...req.body,
     password: hashPassword,
     avatarURL,
+    verificationToken,
   });
+
+  const verifyEmail = {
+    to: email,
+    subject: "Verify your email on click",
+    html: `<a target="_blank" href="${BASE_URL}/users/verify/${user.verificationToken}">Click verify email</a>`,
+  };
+  await sendUserEmail(verifyEmail);
 
   res.json({
     email: newUser.email,
     subscription: newUser.subscription,
+  });
+};
+
+const verifyEmail = async (req, res) => {
+  const { verificationToken } = req.params;
+  const user = await User.findOne({ verificationToken });
+  if (!user) {
+    throw HttpError(401, "email not found");
+  }
+  await User.findByIdAndUpdate(user._id, {
+    verify: true,
+    verificationToken: "",
+  });
+
+  res.json({
+    message: "email veryfied succesful",
+  });
+};
+
+const resentVerifyEmail = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw HttpError(401, "email not found");
+  }
+
+  if (user.verify) {
+    throw HttpError(401, "email already veryfied");
+  }
+
+  const verifyEmail = {
+    to: email,
+    subject: "Verify your email on click",
+    html: `<a target="_blank" href="${BASE_URL}/users/verify/${user.verificationToken}">Click verify email</a>`,
+  };
+  await sendUserEmail(verifyEmail);
+
+  res.json({
+    message: "email veryfied succesful",
   });
 };
 
@@ -44,6 +95,10 @@ const login = async (req, res) => {
 
   if (!user) {
     throw HttpError(401, "email or password invalid");
+  }
+
+  if (!user.verify) {
+    throw HttpError(401, "email not verified");
   }
 
   const passwordCompare = await bcrypt.compare(password, user.password);
@@ -102,6 +157,8 @@ const updateAvatar = async (req, res) => {
 
 export default {
   register: ctrlWrapper(register),
+  verifyEmail: ctrlWrapper(verifyEmail),
+  resentVerifyEmail: ctrlWrapper(resentVerifyEmail),
   login: ctrlWrapper(login),
   current: ctrlWrapper(current),
   logout: ctrlWrapper(logout),

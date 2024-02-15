@@ -9,7 +9,7 @@ import "colors";
 
 dotenv.config();
 
-const { DB_HOST, PORT } = process.env;
+const { DB_HOST, PORT, META_PASSWORD } = process.env;
 
 const app = express();
 
