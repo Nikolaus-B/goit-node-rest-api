@@ -80,7 +80,7 @@ const resentVerifyEmail = async (req, res) => {
   const verifyEmail = {
     to: email,
     subject: "Verify your email on click",
-    html: `<a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">Click verify email</a>`,
+    html: `<a target="_blank" href="${BASE_URL}/users/verify/${user.verificationToken}">Click verify email</a>`,
   };
   await sendUserEmail(verifyEmail);
 
